@@ -1,11 +1,28 @@
-import React, { useState } from 'react';
-import { fetchImages } from './Api.jsx';
+import React, { useEffect, useState } from 'react';
+import { fetchMovies } from '../services/Api';
 import MoviesList from './MoviesList';
+import { useSearchParams } from 'react-router-dom';
 
 const Movies = () => {
   const [search, setSearch] = useState('');
   const [movies, setMovies] = useState([]);
-  const pageParams = '&include_adult=false&language=en-US';
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const query = searchParams.get('query');
+
+  useEffect(() => {
+    if (!query) return;
+    fetchMovies(query)
+      .then(response => {
+        const data = response.data;
+        setMovies(data.results);
+      })
+      .catch(error => {
+        console.error(error);
+        setMovies([]);
+      });
+  }, [query]);
+
   const handleSearchChange = event => {
     setSearch(event.currentTarget.value.toLowerCase());
   };
@@ -15,34 +32,24 @@ const Movies = () => {
     if (search.trim() === '') {
       return;
     }
-    fetchImages(search, pageParams)
-      .then(response => {
-        const data = response.data;
-        setMovies(data.results);
-      })
-      .catch(error => {
-        console.error(error);
-        setMovies([]);
-      });
+    setSearchParams({ query: search });
     setSearch('');
   };
 
   return (
     <div>
-      <div>
-        <form onSubmit={handleSubmit}>
-          <button type="submit">Search</button>
-          <input
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search movies"
-            value={search}
-            onChange={handleSearchChange}
-          />
-        </form>
-        <MoviesList movies={movies} />
-      </div>
+      <form onSubmit={handleSubmit}>
+        <button type="submit">Search</button>
+        <input
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search movies"
+          value={search}
+          onChange={handleSearchChange}
+        />
+      </form>
+      <MoviesList movies={movies} />
     </div>
   );
 };

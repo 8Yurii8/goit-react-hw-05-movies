@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { fetchId } from './Api';
+import { fetchIdReviews } from '../services/Api';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 const Reviews = () => {
-  const params = useParams();
+  const { movieId } = useParams();
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const fetchReviews = () => {
-      const pageParams = `movie/${params.movieId}/reviews?language=en-US`;
-      fetchId(pageParams)
+      fetchIdReviews(movieId)
         .then(response => {
           const data = response.data;
           setReviews(data.results);
@@ -21,7 +20,7 @@ const Reviews = () => {
     };
 
     fetchReviews();
-  }, [params.movieId]);
+  }, [movieId]);
 
   return (
     <ul>

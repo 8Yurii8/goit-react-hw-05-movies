@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { fetchId } from './Api';
-import { useParams, Link, Outlet, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { fetchId } from '../services/Api';
+import { useParams, Link, Outlet, useLocation } from 'react-router-dom';
 import css from 'style.module.css';
 const MovieDetails = () => {
   const params = useParams();
-  const navigate = useNavigate();
+  const location = useLocation();
   const [movie, setMovie] = useState(null);
-  const pageParams = `movie/${params.movieId}?language=en-US`;
+  const goBackLink = useRef(location.state?.from ?? '/');
 
   useEffect(() => {
     const fetchMovieDetails = () => {
-      fetchId(pageParams)
+      fetchId(params.movieId)
         .then(response => {
           const data = response.data;
           setMovie(data);
@@ -22,21 +22,15 @@ const MovieDetails = () => {
     };
 
     fetchMovieDetails();
-  }, [pageParams]);
+  }, [params.movieId]);
 
   if (!movie) {
     return <div>Loading...</div>;
   }
 
-  const goBack = () => {
-    navigate(-1);
-  };
-
   return (
     <div>
-      <button onClick={goBack} className={css.listButton}>
-        Go back
-      </button>
+      <Link to={goBackLink.current}>Go back</Link>
       <div className={css.movieTitle}>
         <img
           src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
